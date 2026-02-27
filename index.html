@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한자 마스터 8급</title>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  background: linear-gradient(135deg, #fef9ef 0%, #fde8d0 100%);
+  min-height: 100vh;
+  color: #3a3a3a;
+  overflow-x: hidden;
+}
+
+/* ===== Utilities ===== */
+.hidden { display: none !important; }
+
+/* ===== Header ===== */
+.app-header {
+  background: linear-gradient(135deg, #ff9a56 0%, #ff6f91 100%);
+  color: #fff;
+  text-align: center;
+  padding: 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(255,111,145,.3);
+}
+.app-header h1 { font-size: 1.6rem; letter-spacing: 2px; }
+.back-btn {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,.25);
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s;
+}
+.back-btn:hover { background: rgba(255,255,255,.4); }
+
+/* ===== Screen container ===== */
+.screen {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* ===== Main Menu ===== */
+#mainScreen .mascot {
+  font-size: 4rem;
+  text-align: center;
+  margin: 24px 0 8px;
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+#mainScreen .subtitle {
+  text-align: center;
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 28px;
+}
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.menu-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 16px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  transition: transform .15s, box-shadow .15s;
+  border: 2px solid transparent;
+}
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+}
+.menu-card:active { transform: scale(.97); }
+.menu-card .icon { font-size: 2.6rem; margin-bottom: 10px; }
+.menu-card .label { font-size: 1.1rem; font-weight: 700; }
+.menu-card.card-learn { border-color: #a0d8ef; }
+.menu-card.card-quiz  { border-color: #f7c5c5; }
+.menu-card.card-exam  { border-color: #c5f7d0; }
+.menu-card.card-score { border-color: #e8d5f5; }
+
+/* ===== Flash Card ===== */
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+.cat-tab {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-size: .95rem;
+  font-weight: 600;
+  transition: all .2s;
+}
+.cat-tab.active {
+  background: #ff9a56;
+  color: #fff;
+  border-color: #ff9a56;
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 14px;
+}
+.flash-card {
+  perspective: 600px;
+  height: 130px;
+  cursor: pointer;
+}
+.flash-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform .5s;
+  transform-style: preserve-3d;
+}
+.flash-card.flipped .flash-card-inner {
+  transform: rotateY(180deg);
+}
+.flash-card-front, .flash-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,.08);
+}
+.flash-card-front {
+  background: #fff;
+  font-size: 3rem;
+  font-weight: 700;
+}
+.flash-card-back {
+  background: linear-gradient(135deg, #ff9a56, #ff6f91);
+  color: #fff;
+  transform: rotateY(180deg);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  padding: 8px;
+}
+
+/* ===== Quiz Common ===== */
+.quiz-type-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.quiz-type-btn {
+  padding: 18px 12px;
+  border-radius: 16px;
+  border: 2px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  transition: all .2s;
+}
+.quiz-type-btn:hover { border-color: #ff9a56; background: #fff5ee; }
+.quiz-type-btn .icon { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+
+/* Quiz gameplay */
+.quiz-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: .95rem;
+}
+.quiz-hud .score { color: #ff6f91; }
+.quiz-hud .combo { color: #ff9a56; }
+.progress-bar {
+  height: 8px;
+  background: #e8e8e8;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.progress-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9a56, #ff6f91);
+  border-radius: 4px;
+  transition: width .3s;
+}
+.quiz-question-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 20px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  margin-bottom: 20px;
+}
+.quiz-question-box .q-label {
+  font-size: .85rem;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+.quiz-question-box .q-main {
+  font-size: 3.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.quiz-question-box .q-sub {
+  font-size: 1.1rem;
+  color: #777;
+}
+.quiz-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.quiz-opt {
+  padding: 18px 12px;
+  border-radius: 16px;
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: 700;
+  transition: all .15s;
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quiz-opt:hover { border-color: #ff9a56; background: #fff8f2; }
+.quiz-opt.correct {
+  border-color: #4caf50;
+  background: #e8f5e9;
+  animation: popCorrect .4s;
+}
+.quiz-opt.wrong {
+  border-color: #e53935;
+  background: #ffebee;
+  animation: shake .4s;
+}
+@keyframes popCorrect {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* Feedback overlay */
+.feedback-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  pointer-events: none;
+}
+.feedback-msg {
+  font-size: 2rem;
+  font-weight: 800;
+  padding: 16px 36px;
+  border-radius: 20px;
+  animation: feedbackPop .6s forwards;
+  opacity: 0;
+}
+.feedback-msg.correct-fb {
+  background: #4caf50;
+  color: #fff;
+}
+.feedback-msg.wrong-fb {
+  background: #e53935;
+  color: #fff;
+}
+@keyframes feedbackPop {
+  0% { opacity: 0; transform: scale(.5); }
+  40% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1) translateY(-30px); }
+}
+
+/* Combo special effect */
+.combo-effect {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 3rem;
+  z-index: 300;
+  animation: comboAnim .8s forwards;
+  pointer-events: none;
+}
+@keyframes comboAnim {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.5) rotate(-10deg); }
+  40% { opacity: 1; transform: translate(-50%,-50%) scale(1.3) rotate(5deg); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1) translateY(-60px); }
+}
+
+/* Stars */
+.stars { font-size: 2.4rem; margin: 16px 0; }
+.stars .star-empty { opacity: .25; }
+
+/* Quiz result */
+.quiz-result {
+  text-align: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+.quiz-result h2 { font-size: 1.5rem; margin-bottom: 8px; }
+.quiz-result .big-score { font-size: 3rem; font-weight: 800; color: #ff6f91; margin: 12px 0; }
+.quiz-result .stat { font-size: 1rem; color: #777; margin: 4px 0; }
+.quiz-result .btn-row { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
+
+/* Buttons */
+.btn {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn:active { transform: scale(.96); }
+.btn-primary {
+  background: linear-gradient(135deg, #ff9a56, #ff6f91);
+  color: #fff;
+}
+.btn-secondary {
+  background: #f0f0f0;
+  color: #555;
+}
+.btn-primary:hover { box-shadow: 0 4px 16px rgba(255,111,145,.3); }
+
+/* ===== Mock Exam ===== */
+.exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 14px 20px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  font-weight: 700;
+}
+.exam-header .timer { color: #e53935; font-size: 1.1rem; }
+.exam-q {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.exam-q .q-num {
+  font-size: .85rem;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+.exam-q .q-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.exam-q .q-text .hanja-inline {
+  font-size: 1.6rem;
+}
+.exam-q .exam-opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.exam-q .exam-opt {
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #e8e8e8;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all .15s;
+}
+.exam-q .exam-opt:hover { border-color: #ff9a56; }
+.exam-q .exam-opt.selected {
+  border-color: #ff6f91;
+  background: #fff0f3;
+}
+
+/* Exam result */
+.exam-result {
+  text-align: center;
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  margin-bottom: 20px;
+}
+.exam-result .pass { color: #4caf50; font-size: 1.8rem; font-weight: 800; }
+.exam-result .fail { color: #e53935; font-size: 1.8rem; font-weight: 800; }
+.wrong-list {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.wrong-list h3 { margin-bottom: 12px; color: #e53935; }
+.wrong-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.wrong-item:last-child { border-bottom: none; }
+.wrong-item .wi-q { font-weight: 700; }
+.wrong-item .wi-a { color: #4caf50; }
+
+/* ===== Score Board ===== */
+.score-summary {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.score-summary h2 { margin-bottom: 12px; }
+.score-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.score-stat-item {
+  background: #fef9ef;
+  border-radius: 14px;
+  padding: 16px 8px;
+}
+.score-stat-item .num { font-size: 1.8rem; font-weight: 800; color: #ff6f91; }
+.score-stat-item .lbl { font-size: .8rem; color: #999; margin-top: 4px; }
+
+.weak-section {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  margin-bottom: 20px;
+}
+.weak-section h3 { margin-bottom: 12px; }
+.weak-char {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffebee;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 4px;
+  font-weight: 700;
+}
+.weak-char .wc-hanja { font-size: 1.6rem; }
+.weak-char .wc-rate { font-size: .75rem; color: #e53935; }
+
+.all-chars-section {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  margin-bottom: 20px;
+}
+.all-chars-section h3 { margin-bottom: 12px; }
+.char-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  gap: 12px;
+}
+.char-row:last-child { border-bottom: none; }
+.char-row .cr-hanja { font-size: 1.5rem; font-weight: 700; width: 40px; text-align: center; }
+.char-row .cr-info { flex: 1; font-size: .9rem; color: #777; }
+.char-row .cr-bar { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+.char-row .cr-bar .cr-fill { height: 100%; border-radius: 4px; }
+.char-row .cr-rate { font-size: .85rem; font-weight: 700; width: 42px; text-align: right; }
+.cr-fill.good { background: #4caf50; }
+.cr-fill.mid { background: #ff9800; }
+.cr-fill.bad { background: #e53935; }
+
+.reset-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 12px 24px;
+  border: 2px solid #e53935;
+  border-radius: 12px;
+  background: #fff;
+  color: #e53935;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 420px) {
+  .menu-grid { grid-template-columns: 1fr; }
+  .quiz-options { grid-template-columns: 1fr; }
+  .exam-q .exam-opts { grid-template-columns: 1fr; }
+  .quiz-question-box .q-main { font-size: 2.6rem; }
+  .score-stats { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="app-header">
+  <button class="back-btn hidden" id="backBtn" onclick="goBack()">&#8592;</button>
+  <h1 id="headerTitle">한자 마스터 8급</h1>
+</header>
+
+<!-- ===== Main Screen ===== -->
+<div class="screen" id="mainScreen">
+  <div class="mascot">📚✨</div>
+  <div class="subtitle">한자능력검정시험 8급 대비</div>
+  <div class="menu-grid">
+    <div class="menu-card card-learn" onclick="showScreen('cardScreen')">
+      <div class="icon">🃏</div>
+      <div class="label">한자 카드 학습</div>
+    </div>
+    <div class="menu-card card-quiz" onclick="showScreen('quizSelect')">
+      <div class="icon">🎯</div>
+      <div class="label">퀴즈 도전</div>
+    </div>
+    <div class="menu-card card-exam" onclick="showScreen('examScreen')">
+      <div class="icon">📝</div>
+      <div class="label">모의시험</div>
+    </div>
+    <div class="menu-card card-score" onclick="showScreen('scoreScreen')">
+      <div class="icon">🏆</div>
+      <div class="label">내 성적표</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Flash Card Screen ===== -->
+<div class="screen hidden" id="cardScreen">
+  <div class="category-tabs" id="categoryTabs"></div>
+  <div class="card-grid" id="cardGrid"></div>
+</div>
+
+<!-- ===== Quiz Select Screen ===== -->
+<div class="screen hidden" id="quizSelect">
+  <h2 style="text-align:center;margin-bottom:20px;">퀴즈 유형을 골라봐!</h2>
+  <div class="quiz-type-select">
+    <div class="quiz-type-btn" onclick="startQuiz('reading')">
+      <span class="icon">🔤</span> 독음 맞추기
+    </div>
+    <div class="quiz-type-btn" onclick="startQuiz('findHanja')">
+      <span class="icon">🔍</span> 한자 찾기
+    </div>
+    <div class="quiz-type-btn" onclick="startQuiz('huneum')">
+      <span class="icon">📖</span> 훈음 맞추기
+    </div>
+    <div class="quiz-type-btn" onclick="startQuiz('mix')">
+      <span class="icon">🎲</span> 종합 퀴즈
+    </div>
+  </div>
+</div>
+
+<!-- ===== Quiz Play Screen ===== -->
+<div class="screen hidden" id="quizPlay">
+  <div class="quiz-hud">
+    <span class="score" id="quizScore">점수: 0</span>
+    <span class="combo" id="quizCombo"></span>
+    <span id="quizProgress">1 / 10</span>
+  </div>
+  <div class="progress-bar"><div class="fill" id="quizProgressBar" style="width:0%"></div></div>
+  <div class="quiz-question-box">
+    <div class="q-label" id="quizLabel"></div>
+    <div class="q-main" id="quizMain"></div>
+    <div class="q-sub" id="quizSub"></div>
+  </div>
+  <div class="quiz-options" id="quizOptions"></div>
+</div>
+
+<!-- ===== Quiz Result Screen ===== -->
+<div class="screen hidden" id="quizResult">
+  <div class="quiz-result" id="quizResultContent"></div>
+</div>
+
+<!-- ===== Exam Screen ===== -->
+<div class="screen hidden" id="examScreen">
+  <div style="text-align:center;margin-bottom:20px;">
+    <h2>모의시험</h2>
+    <p style="color:#777;margin:8px 0 20px;">실전처럼 50문항에 도전해 보자!</p>
+    <label style="font-size:.95rem;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
+      <input type="checkbox" id="timerToggle" checked>
+      <span>50분 타이머 사용</span>
+    </label>
+    <button class="btn btn-primary" onclick="startExam()">시험 시작!</button>
+  </div>
+</div>
+
+<!-- ===== Exam Play Screen ===== -->
+<div class="screen hidden" id="examPlay">
+  <div class="exam-header">
+    <span id="examProgressText">1 / 50</span>
+    <span class="timer" id="examTimer">50:00</span>
+  </div>
+  <div id="examQuestions"></div>
+  <div style="text-align:center;margin-top:20px;">
+    <button class="btn btn-primary" onclick="submitExam()">제출하기</button>
+  </div>
+</div>
+
+<!-- ===== Exam Result Screen ===== -->
+<div class="screen hidden" id="examResult">
+  <div class="exam-result" id="examResultContent"></div>
+  <div class="wrong-list hidden" id="examWrongList"></div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="btn btn-primary" onclick="showScreen('examScreen')">다시 도전</button>
+    <button class="btn btn-secondary" style="margin-left:8px;" onclick="goBack()">메인으로</button>
+  </div>
+</div>
+
+<!-- ===== Score Screen ===== -->
+<div class="screen hidden" id="scoreScreen">
+  <div class="score-summary" id="scoreSummary"></div>
+  <div class="weak-section" id="weakSection"></div>
+  <div class="all-chars-section" id="allCharsSection"></div>
+  <button class="reset-btn" onclick="resetScores()">학습 기록 초기화</button>
+</div>
+
+<!-- ===== Feedback overlay ===== -->
+<div class="feedback-overlay hidden" id="feedbackOverlay">
+  <div class="feedback-msg" id="feedbackMsg"></div>
+</div>
+
+<script>
+/* ========================================================
+   한자 데이터 (50자)
+   ======================================================== */
+const hanjaData = [
+  // 숫자
+  { hanja:"一", hun:"하나", eum:"일", category:"숫자", strokes:1 },
+  { hanja:"二", hun:"두", eum:"이", category:"숫자", strokes:2 },
+  { hanja:"三", hun:"석", eum:"삼", category:"숫자", strokes:3 },
+  { hanja:"四", hun:"넉", eum:"사", category:"숫자", strokes:5 },
+  { hanja:"五", hun:"다섯", eum:"오", category:"숫자", strokes:4 },
+  { hanja:"六", hun:"여섯", eum:"육", category:"숫자", strokes:4 },
+  { hanja:"七", hun:"일곱", eum:"칠", category:"숫자", strokes:2 },
+  { hanja:"八", hun:"여덟", eum:"팔", category:"숫자", strokes:2 },
+  { hanja:"九", hun:"아홉", eum:"구", category:"숫자", strokes:2 },
+  { hanja:"十", hun:"열", eum:"십", category:"숫자", strokes:2 },
+  // 시간/자연
+  { hanja:"年", hun:"해", eum:"년", category:"시간·자연", strokes:6 },
+  { hanja:"月", hun:"달", eum:"월", category:"시간·자연", strokes:4 },
+  { hanja:"日", hun:"날", eum:"일", category:"시간·자연", strokes:4 },
+  { hanja:"火", hun:"불", eum:"화", category:"시간·자연", strokes:4 },
+  { hanja:"水", hun:"물", eum:"수", category:"시간·자연", strokes:4 },
+  { hanja:"木", hun:"나무", eum:"목", category:"시간·자연", strokes:4 },
+  { hanja:"金", hun:"쇠", eum:"금", category:"시간·자연", strokes:8 },
+  { hanja:"土", hun:"흙", eum:"토", category:"시간·자연", strokes:3 },
+  // 크기/위치
+  { hanja:"大", hun:"큰", eum:"대", category:"크기·위치", strokes:3 },
+  { hanja:"小", hun:"작을", eum:"소", category:"크기·위치", strokes:3 },
+  { hanja:"長", hun:"긴", eum:"장", category:"크기·위치", strokes:8 },
+  { hanja:"中", hun:"가운데", eum:"중", category:"크기·위치", strokes:4 },
+  { hanja:"外", hun:"바깥", eum:"외", category:"크기·위치", strokes:5 },
+  // 방향
+  { hanja:"東", hun:"동녘", eum:"동", category:"방향", strokes:8 },
+  { hanja:"西", hun:"서녘", eum:"서", category:"방향", strokes:6 },
+  { hanja:"南", hun:"남녘", eum:"남", category:"방향", strokes:9 },
+  { hanja:"北", hun:"북녘", eum:"북", category:"방향", strokes:5 },
+  // 장소
+  { hanja:"山", hun:"메", eum:"산", category:"장소", strokes:3 },
+  { hanja:"門", hun:"문", eum:"문", category:"장소", strokes:8 },
+  { hanja:"室", hun:"집", eum:"실", category:"장소", strokes:9 },
+  // 사람
+  { hanja:"人", hun:"사람", eum:"인", category:"사람", strokes:2 },
+  { hanja:"女", hun:"여자", eum:"여", category:"사람", strokes:3 },
+  { hanja:"民", hun:"백성", eum:"민", category:"사람", strokes:5 },
+  { hanja:"王", hun:"임금", eum:"왕", category:"사람", strokes:4 },
+  { hanja:"軍", hun:"군사", eum:"군", category:"사람", strokes:9 },
+  // 가족
+  { hanja:"父", hun:"아비", eum:"부", category:"가족", strokes:4 },
+  { hanja:"母", hun:"어미", eum:"모", category:"가족", strokes:5 },
+  { hanja:"兄", hun:"형", eum:"형", category:"가족", strokes:5 },
+  { hanja:"弟", hun:"아우", eum:"제", category:"가족", strokes:7 },
+  // 학교
+  { hanja:"先", hun:"먼저", eum:"선", category:"학교", strokes:6 },
+  { hanja:"生", hun:"날", eum:"생", category:"학교", strokes:5 },
+  { hanja:"學", hun:"배울", eum:"학", category:"학교", strokes:16 },
+  { hanja:"校", hun:"학교", eum:"교", category:"학교", strokes:10 },
+  { hanja:"敎", hun:"가르칠", eum:"교", category:"학교", strokes:11 },
+  // 나라
+  { hanja:"國", hun:"나라", eum:"국", category:"나라", strokes:11 },
+  { hanja:"韓", hun:"한국/나라", eum:"한", category:"나라", strokes:17 },
+  { hanja:"萬", hun:"일만", eum:"만", category:"나라", strokes:13 },
+  // 기타
+  { hanja:"白", hun:"흰", eum:"백", category:"기타", strokes:5 },
+  { hanja:"靑", hun:"푸를", eum:"청", category:"기타", strokes:8 },
+  { hanja:"寸", hun:"마디", eum:"촌", category:"기타", strokes:3 },
+];
+
+const categories = [...new Set(hanjaData.map(h => h.category))];
+
+/* ========================================================
+   State
+   ======================================================== */
+let screenStack = ['mainScreen'];
+let quizState = {};
+let examState = {};
+let examTimerInterval = null;
+
+/* ========================================================
+   Navigation
+   ======================================================== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+
+  const isMain = id === 'mainScreen';
+  document.getElementById('backBtn').classList.toggle('hidden', isMain);
+
+  const titles = {
+    mainScreen: '한자 마스터 8급',
+    cardScreen: '한자 카드 학습',
+    quizSelect: '퀴즈 도전',
+    quizPlay: '퀴즈 도전',
+    quizResult: '퀴즈 결과',
+    examScreen: '모의시험',
+    examPlay: '모의시험',
+    examResult: '시험 결과',
+    scoreScreen: '내 성적표'
+  };
+  document.getElementById('headerTitle').textContent = titles[id] || '한자 마스터 8급';
+
+  if (!isMain) {
+    if (screenStack[screenStack.length - 1] !== id) screenStack.push(id);
+  } else {
+    screenStack = ['mainScreen'];
+  }
+
+  // Init screens
+  if (id === 'cardScreen') initCardScreen();
+  if (id === 'scoreScreen') initScoreScreen();
+}
+
+function goBack() {
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+  screenStack.pop();
+  const prev = screenStack[screenStack.length - 1] || 'mainScreen';
+  showScreen(prev);
+}
+
+/* ========================================================
+   Flash Card
+   ======================================================== */
+function initCardScreen() {
+  const tabsEl = document.getElementById('categoryTabs');
+  const gridEl = document.getElementById('cardGrid');
+  tabsEl.innerHTML = '';
+
+  // "전체" tab
+  const allTab = document.createElement('button');
+  allTab.className = 'cat-tab active';
+  allTab.textContent = '전체';
+  allTab.onclick = () => renderCards('전체');
+  tabsEl.appendChild(allTab);
+
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab';
+    btn.textContent = cat;
+    btn.onclick = () => renderCards(cat);
+    tabsEl.appendChild(btn);
+  });
+
+  renderCards('전체');
+}
+
+function renderCards(cat) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    if (t.textContent === cat) t.classList.add('active');
+  });
+
+  const gridEl = document.getElementById('cardGrid');
+  const list = shuffle([...(cat === '전체' ? hanjaData : hanjaData.filter(h => h.category === cat))]);
+  gridEl.innerHTML = '';
+  list.forEach(h => {
+    const card = document.createElement('div');
+    card.className = 'flash-card';
+    card.innerHTML = `
+      <div class="flash-card-inner">
+        <div class="flash-card-front">${h.hanja}</div>
+        <div class="flash-card-back">${h.hun}<br>${h.eum}</div>
+      </div>`;
+    card.onclick = () => card.classList.toggle('flipped');
+    gridEl.appendChild(card);
+  });
+}
+
+/* ========================================================
+   Quiz Engine
+   ======================================================== */
+const QUIZ_COUNT = 10;
+const encourageCorrect = ["대단해! 👏", "잘했어! ✨", "천재인데?! 🌟", "한자 박사! 🎓", "멋져! 💪", "최고야! 🥇"];
+const encourageWrong = ["괜찮아, 다음엔 맞출 수 있어! 💪", "아깝다! 조금만 더! 🍀", "실수는 누구나 해! 😊", "다시 도전해보자! ✨"];
+
+function startQuiz(type) {
+  const questions = generateQuizQuestions(type, QUIZ_COUNT);
+  quizState = {
+    type, questions, current: 0,
+    score: 0, combo: 0, maxCombo: 0,
+    correctCount: 0, answered: false
+  };
+  showScreen('quizPlay');
+  renderQuizQuestion();
+}
+
+function generateQuizQuestions(type, count) {
+  const questions = [];
+  const pool = [...hanjaData];
+  for (let i = 0; i < count; i++) {
+    let qType = type;
+    if (type === 'mix') {
+      const types = ['reading','findHanja','huneum'];
+      qType = types[Math.floor(Math.random() * types.length)];
+    }
+    const idx = Math.floor(Math.random() * pool.length);
+    const target = pool[idx];
+
+    // Generate 4 options (1 correct + 3 wrong)
+    const wrongs = hanjaData.filter(h => h.hanja !== target.hanja);
+    shuffle(wrongs);
+    const wrongOpts = wrongs.slice(0, 3);
+
+    let q;
+    if (qType === 'reading') {
+      q = {
+        label: '독음 맞추기',
+        main: target.hanja,
+        sub: '이 한자의 읽는 소리는?',
+        options: shuffle([
+          { text: target.eum, correct: true },
+          ...wrongOpts.map(w => ({ text: w.eum, correct: false }))
+        ]),
+        target
+      };
+    } else if (qType === 'findHanja') {
+      q = {
+        label: '한자 찾기',
+        main: target.hun,
+        sub: '이 뜻에 맞는 한자는?',
+        options: shuffle([
+          { text: target.hanja, correct: true },
+          ...wrongOpts.map(w => ({ text: w.hanja, correct: false }))
+        ]),
+        target
+      };
+    } else {
+      q = {
+        label: '훈음 맞추기',
+        main: target.hanja,
+        sub: '이 한자의 훈(뜻)과 음(소리)은?',
+        options: shuffle([
+          { text: `${target.hun} ${target.eum}`, correct: true },
+          ...wrongOpts.map(w => ({ text: `${w.hun} ${w.eum}`, correct: false }))
+        ]),
+        target
+      };
+    }
+    // Ensure no duplicate option texts
+    const seen = new Set();
+    q.options = q.options.filter(o => {
+      if (seen.has(o.text)) return false;
+      seen.add(o.text);
+      return true;
+    });
+    // Pad back to 4 if duplicates removed
+    while (q.options.length < 4) {
+      const extra = hanjaData[Math.floor(Math.random() * hanjaData.length)];
+      let t;
+      if (qType === 'reading') t = extra.eum;
+      else if (qType === 'findHanja') t = extra.hanja;
+      else t = `${extra.hun} ${extra.eum}`;
+      if (!seen.has(t) && extra.hanja !== target.hanja) {
+        seen.add(t);
+        q.options.push({ text: t, correct: false });
+      }
+    }
+    questions.push(q);
+  }
+  return questions;
+}
+
+function renderQuizQuestion() {
+  const s = quizState;
+  const q = s.questions[s.current];
+  s.answered = false;
+
+  document.getElementById('quizScore').textContent = `점수: ${s.score}`;
+  document.getElementById('quizCombo').textContent = s.combo > 0 ? `🔥 ${s.combo} 콤보` : '';
+  document.getElementById('quizProgress').textContent = `${s.current + 1} / ${s.questions.length}`;
+  document.getElementById('quizProgressBar').style.width = `${(s.current / s.questions.length) * 100}%`;
+  document.getElementById('quizLabel').textContent = q.label;
+  document.getElementById('quizMain').textContent = q.main;
+  document.getElementById('quizSub').textContent = q.sub;
+
+  const optsEl = document.getElementById('quizOptions');
+  optsEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt.text;
+    btn.onclick = () => handleQuizAnswer(i);
+    optsEl.appendChild(btn);
+  });
+}
+
+function handleQuizAnswer(idx) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+
+  const q = quizState.questions[quizState.current];
+  const opts = document.querySelectorAll('#quizOptions .quiz-opt');
+  const isCorrect = q.options[idx].correct;
+
+  // Highlight correct and wrong
+  q.options.forEach((opt, i) => {
+    if (opt.correct) opts[i].classList.add('correct');
+    if (i === idx && !opt.correct) opts[i].classList.add('wrong');
+  });
+
+  if (isCorrect) {
+    quizState.combo++;
+    if (quizState.combo > quizState.maxCombo) quizState.maxCombo = quizState.combo;
+    const comboBonus = Math.max(0, (quizState.combo - 1) * 5);
+    quizState.score += 10 + comboBonus;
+    quizState.correctCount++;
+    showFeedback(true);
+    if (quizState.combo > 0 && quizState.combo % 5 === 0) showComboEffect(quizState.combo);
+    recordAnswer(q.target.hanja, true);
+  } else {
+    quizState.combo = 0;
+    showFeedback(false);
+    recordAnswer(q.target.hanja, false);
+  }
+
+  document.getElementById('quizScore').textContent = `점수: ${quizState.score}`;
+  document.getElementById('quizCombo').textContent = quizState.combo > 0 ? `🔥 ${quizState.combo} 콤보` : '';
+
+  setTimeout(() => {
+    quizState.current++;
+    if (quizState.current < quizState.questions.length) {
+      renderQuizQuestion();
+    } else {
+      showQuizResult();
+    }
+  }, 1000);
+}
+
+function showFeedback(correct) {
+  const overlay = document.getElementById('feedbackOverlay');
+  const msg = document.getElementById('feedbackMsg');
+  overlay.classList.remove('hidden');
+  msg.className = 'feedback-msg ' + (correct ? 'correct-fb' : 'wrong-fb');
+  msg.textContent = correct
+    ? encourageCorrect[Math.floor(Math.random() * encourageCorrect.length)]
+    : encourageWrong[Math.floor(Math.random() * encourageWrong.length)];
+  setTimeout(() => overlay.classList.add('hidden'), 700);
+}
+
+function showComboEffect(combo) {
+  const el = document.createElement('div');
+  el.className = 'combo-effect';
+  el.textContent = `🔥 ${combo} 콤보! 🔥`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+function showQuizResult() {
+  const s = quizState;
+  const pct = Math.round((s.correctCount / s.questions.length) * 100);
+  const starCount = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 50 ? 1 : 0;
+  const starsHtml = Array.from({length:3}, (_,i) =>
+    `<span class="${i < starCount ? '' : 'star-empty'}">⭐</span>`
+  ).join('');
+
+  document.getElementById('quizProgressBar').style.width = '100%';
+
+  document.getElementById('quizResultContent').innerHTML = `
+    <h2>퀴즈 완료!</h2>
+    <div class="stars">${starsHtml}</div>
+    <div class="big-score">${s.score}점</div>
+    <div class="stat">정답: ${s.correctCount} / ${s.questions.length} (${pct}%)</div>
+    <div class="stat">최대 콤보: ${s.maxCombo}</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="startQuiz('${s.type}')">다시 도전</button>
+      <button class="btn btn-secondary" onclick="showScreen('quizSelect')">유형 선택</button>
+    </div>
+  `;
+  showScreen('quizResult');
+}
+
+/* ========================================================
+   Mock Exam
+   ======================================================== */
+function startExam() {
+  const useTimer = document.getElementById('timerToggle').checked;
+  const questions = generateExamQuestions();
+  examState = { questions, answers: new Array(50).fill(null), useTimer, timeLeft: 50 * 60 };
+  showScreen('examPlay');
+  renderExamQuestions();
+  if (useTimer) startExamTimer();
+}
+
+function generateExamQuestions() {
+  const questions = [];
+  const allHanja = [...hanjaData];
+  shuffle(allHanja);
+
+  // 유형 1: 독음 쓰기 (~16문항)
+  for (let i = 0; i < 16; i++) {
+    const t = allHanja[i % allHanja.length];
+    const wrongs = getWrongOptions(t, 3, 'eum');
+    questions.push({
+      type: 'reading',
+      text: `다음 한자의 읽는 소리(음)는?`,
+      display: t.hanja,
+      options: shuffle([
+        { text: t.eum, correct: true },
+        ...wrongs.map(w => ({ text: w.eum, correct: false }))
+      ]),
+      target: t,
+      answer: t.eum
+    });
+  }
+
+  shuffle(allHanja);
+  // 유형 2: 한자 찾기 (~16문항)
+  for (let i = 0; i < 16; i++) {
+    const t = allHanja[i % allHanja.length];
+    const wrongs = getWrongOptions(t, 3, 'hanja');
+    questions.push({
+      type: 'findHanja',
+      text: `'${t.hun}'에 해당하는 한자는?`,
+      display: null,
+      options: shuffle([
+        { text: t.hanja, correct: true },
+        ...wrongs.map(w => ({ text: w.hanja, correct: false }))
+      ]),
+      target: t,
+      answer: t.hanja
+    });
+  }
+
+  shuffle(allHanja);
+  // 유형 3: 뜻에 맞는 한자 찾기 (~8문항)
+  for (let i = 0; i < 8; i++) {
+    const t = allHanja[i % allHanja.length];
+    const wrongs = getWrongOptions(t, 3, 'hanja');
+    questions.push({
+      type: 'meaning',
+      text: `'${t.hun} ${t.eum}'에 해당하는 한자는?`,
+      display: null,
+      options: shuffle([
+        { text: t.hanja, correct: true },
+        ...wrongs.map(w => ({ text: w.hanja, correct: false }))
+      ]),
+      target: t,
+      answer: t.hanja
+    });
+  }
+
+  shuffle(allHanja);
+  // 유형 4: 훈음 쓰기 (~8문항)
+  for (let i = 0; i < 8; i++) {
+    const t = allHanja[i % allHanja.length];
+    const wrongs = getWrongOptions(t, 3, 'huneum');
+    questions.push({
+      type: 'huneum',
+      text: `다음 한자의 훈(뜻)과 음(소리)은?`,
+      display: t.hanja,
+      options: shuffle([
+        { text: `${t.hun} ${t.eum}`, correct: true },
+        ...wrongs.map(w => ({ text: `${w.hun} ${w.eum}`, correct: false }))
+      ]),
+      target: t,
+      answer: `${t.hun} ${t.eum}`
+    });
+  }
+
+  // 유형 5: 획순 (2문항)
+  shuffle(allHanja);
+  for (let i = 0; i < 2; i++) {
+    const t = allHanja[i];
+    const correctStrokes = t.strokes;
+    const opts = new Set([correctStrokes]);
+    while (opts.size < 4) {
+      const diff = Math.floor(Math.random() * 5) + 1;
+      const candidate = Math.random() < 0.5 ? correctStrokes + diff : Math.max(1, correctStrokes - diff);
+      opts.add(candidate);
+    }
+    questions.push({
+      type: 'strokes',
+      text: `한자 '${t.hanja}'의 총 획수는?`,
+      display: t.hanja,
+      options: shuffle([...opts].map(n => ({
+        text: `${n}획`,
+        correct: n === correctStrokes
+      }))),
+      target: t,
+      answer: `${correctStrokes}획`
+    });
+  }
+
+  shuffle(questions);
+  return questions;
+}
+
+function getWrongOptions(target, count, field) {
+  const wrongs = hanjaData.filter(h => {
+    if (h.hanja === target.hanja) return false;
+    if (field === 'eum' && h.eum === target.eum) return false;
+    if (field === 'hanja' && h.hanja === target.hanja) return false;
+    if (field === 'huneum' && h.hun === target.hun && h.eum === target.eum) return false;
+    return true;
+  });
+  shuffle(wrongs);
+  return wrongs.slice(0, count);
+}
+
+function renderExamQuestions() {
+  const container = document.getElementById('examQuestions');
+  container.innerHTML = '';
+  examState.questions.forEach((q, qi) => {
+    const div = document.createElement('div');
+    div.className = 'exam-q';
+    div.id = `examQ${qi}`;
+    let displayHtml = '';
+    if (q.display) {
+      displayHtml = `<span class="hanja-inline">${q.display}</span> `;
+    }
+    div.innerHTML = `
+      <div class="q-num">문제 ${qi + 1}</div>
+      <div class="q-text">${displayHtml}${q.text}</div>
+      <div class="exam-opts">
+        ${q.options.map((opt, oi) => `
+          <div class="exam-opt" data-qi="${qi}" data-oi="${oi}" onclick="selectExamOpt(${qi},${oi})">
+            ${opt.text}
+          </div>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  updateExamProgress();
+}
+
+function selectExamOpt(qi, oi) {
+  examState.answers[qi] = oi;
+  const qEl = document.getElementById(`examQ${qi}`);
+  qEl.querySelectorAll('.exam-opt').forEach((el, i) => {
+    el.classList.toggle('selected', i === oi);
+  });
+  updateExamProgress();
+}
+
+function updateExamProgress() {
+  const answered = examState.answers.filter(a => a !== null).length;
+  document.getElementById('examProgressText').textContent = `${answered} / ${examState.questions.length} 답변 완료`;
+}
+
+function startExamTimer() {
+  if (examTimerInterval) clearInterval(examTimerInterval);
+  examTimerInterval = setInterval(() => {
+    examState.timeLeft--;
+    if (examState.timeLeft <= 0) {
+      clearInterval(examTimerInterval);
+      examTimerInterval = null;
+      submitExam();
+      return;
+    }
+    const min = Math.floor(examState.timeLeft / 60);
+    const sec = examState.timeLeft % 60;
+    document.getElementById('examTimer').textContent =
+      `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function submitExam() {
+  if (examTimerInterval) { clearInterval(examTimerInterval); examTimerInterval = null; }
+
+  let correct = 0;
+  const wrongItems = [];
+  examState.questions.forEach((q, qi) => {
+    const ai = examState.answers[qi];
+    if (ai !== null && q.options[ai].correct) {
+      correct++;
+      recordAnswer(q.target.hanja, true);
+    } else {
+      recordAnswer(q.target.hanja, false);
+      wrongItems.push({
+        num: qi + 1,
+        text: q.text,
+        display: q.display,
+        userAnswer: ai !== null ? q.options[ai].text : '미응답',
+        correctAnswer: q.answer
+      });
+    }
+  });
+
+  const score = correct * 2; // 50문항 × 2점 = 100점
+  const passed = score >= 70;
+
+  document.getElementById('examResultContent').innerHTML = `
+    <h2>시험 결과</h2>
+    <div class="${passed ? 'pass' : 'fail'}">${passed ? '🎉 합격!' : '😢 불합격'}</div>
+    <div class="big-score" style="color:${passed ? '#4caf50' : '#e53935'}">${score}점</div>
+    <div class="stat">정답: ${correct} / ${examState.questions.length}</div>
+    <div class="stat">합격 기준: 70점 이상</div>
+  `;
+
+  const wrongListEl = document.getElementById('examWrongList');
+  if (wrongItems.length > 0) {
+    wrongListEl.classList.remove('hidden');
+    wrongListEl.innerHTML = `<h3>오답 해설 (${wrongItems.length}문제)</h3>` +
+      wrongItems.map(w => `
+        <div class="wrong-item">
+          <div class="wi-q">${w.num}번. ${w.display ? w.display + ' ' : ''}${w.text}</div>
+          <div>내 답: ${w.userAnswer} → <span class="wi-a">정답: ${w.correctAnswer}</span></div>
+        </div>
+      `).join('');
+  } else {
+    wrongListEl.classList.add('hidden');
+  }
+
+  // Save exam record
+  const records = loadData();
+  if (!records.examHistory) records.examHistory = [];
+  records.examHistory.push({ date: new Date().toISOString(), score, correct, total: 50 });
+  saveData(records);
+
+  showScreen('examResult');
+}
+
+/* ========================================================
+   Score / Stats
+   ======================================================== */
+function recordAnswer(hanja, correct) {
+  const records = loadData();
+  if (!records.charStats) records.charStats = {};
+  if (!records.charStats[hanja]) records.charStats[hanja] = { correct: 0, total: 0 };
+  records.charStats[hanja].total++;
+  if (correct) records.charStats[hanja].correct++;
+  saveData(records);
+}
+
+function loadData() {
+  try {
+    return JSON.parse(localStorage.getItem('hanjaMaster8')) || {};
+  } catch { return {}; }
+}
+
+function saveData(data) {
+  localStorage.setItem('hanjaMaster8', JSON.stringify(data));
+}
+
+function initScoreScreen() {
+  const records = loadData();
+  const stats = records.charStats || {};
+  const examHistory = records.examHistory || [];
+
+  // Summary
+  let totalCorrect = 0, totalAttempts = 0;
+  hanjaData.forEach(h => {
+    const s = stats[h.hanja];
+    if (s) { totalCorrect += s.correct; totalAttempts += s.total; }
+  });
+
+  const studiedCount = Object.keys(stats).length;
+  const overallRate = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+
+  document.getElementById('scoreSummary').innerHTML = `
+    <h2>학습 현황</h2>
+    <div class="score-stats">
+      <div class="score-stat-item">
+        <div class="num">${studiedCount}/50</div>
+        <div class="lbl">학습한 한자</div>
+      </div>
+      <div class="score-stat-item">
+        <div class="num">${overallRate}%</div>
+        <div class="lbl">전체 정답률</div>
+      </div>
+      <div class="score-stat-item">
+        <div class="num">${examHistory.length}</div>
+        <div class="lbl">모의시험 횟수</div>
+      </div>
+    </div>
+    ${examHistory.length > 0 ? `<div class="stat" style="color:#777;">최근 시험: ${examHistory[examHistory.length-1].score}점</div>` : ''}
+  `;
+
+  // Weak characters (정답률 < 60%)
+  const weakChars = hanjaData.filter(h => {
+    const s = stats[h.hanja];
+    return s && s.total >= 1 && (s.correct / s.total) < 0.6;
+  }).sort((a, b) => {
+    const ra = stats[a.hanja].correct / stats[a.hanja].total;
+    const rb = stats[b.hanja].correct / stats[b.hanja].total;
+    return ra - rb;
+  });
+
+  const weakEl = document.getElementById('weakSection');
+  if (weakChars.length > 0) {
+    weakEl.classList.remove('hidden');
+    weakEl.innerHTML = `<h3>취약 한자 (정답률 60% 미만)</h3>` +
+      weakChars.map(h => {
+        const s = stats[h.hanja];
+        const r = Math.round((s.correct / s.total) * 100);
+        return `<span class="weak-char"><span class="wc-hanja">${h.hanja}</span><span class="wc-rate">${r}%</span></span>`;
+      }).join('');
+  } else {
+    weakEl.innerHTML = '<h3>취약 한자</h3><p style="color:#999;font-size:.9rem;">아직 데이터가 없어요. 퀴즈를 풀어보세요!</p>';
+  }
+
+  // All characters
+  const allEl = document.getElementById('allCharsSection');
+  allEl.innerHTML = '<h3>전체 한자 정답률</h3>' +
+    hanjaData.map(h => {
+      const s = stats[h.hanja];
+      const rate = s ? Math.round((s.correct / s.total) * 100) : -1;
+      const barClass = rate >= 70 ? 'good' : rate >= 40 ? 'mid' : rate >= 0 ? 'bad' : '';
+      const rateText = rate >= 0 ? `${rate}%` : '-';
+      const barWidth = rate >= 0 ? rate : 0;
+      return `
+        <div class="char-row">
+          <div class="cr-hanja">${h.hanja}</div>
+          <div class="cr-info">${h.hun} ${h.eum}</div>
+          <div class="cr-bar"><div class="cr-fill ${barClass}" style="width:${barWidth}%"></div></div>
+          <div class="cr-rate">${rateText}</div>
+        </div>`;
+    }).join('');
+}
+
+function resetScores() {
+  if (confirm('정말 학습 기록을 모두 지울까요?')) {
+    localStorage.removeItem('hanjaMaster8');
+    initScoreScreen();
+  }
+}
+
+/* ========================================================
+   Utility
+   ======================================================== */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
